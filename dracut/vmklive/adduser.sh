@@ -34,9 +34,7 @@ chroot ${NEWROOT} passwd -d $USERNAME >/dev/null 2>&1
 chroot ${NEWROOT} cp -a /etc/skel/. /home/$USERNAME/
 chroot ${NEWROOT} chown -R $USERNAME:$USERNAME /home/$USERNAME
 
-# xfdesktop refuses to launch a .desktop file it hasn't seen marked
-# trusted, showing an "untrusted" warning even though it's executable.
-# Set that trust flag now so the shortcut launches cleanly on first login.
+# Mark trusted so xfdesktop doesn't show an "untrusted" warning on launch.
 if [ -f ${NEWROOT}/home/$USERNAME/Desktop/kron.desktop ]; then
     chroot ${NEWROOT} su $USERNAME -c \
         "gio set /home/$USERNAME/Desktop/kron.desktop metadata::trusted yes" >/dev/null 2>&1
