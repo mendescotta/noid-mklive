@@ -6,12 +6,12 @@ if ! type getarg >/dev/null 2>&1 && ! type getargbool >/dev/null 2>&1; then
     . /lib/dracut-lib.sh
 fi
 
-echo noid-live > ${NEWROOT}/etc/hostname
+echo void-live > ${NEWROOT}/etc/hostname
 
 USERNAME=$(getarg live.user)
 USERSHELL=$(getarg live.shell)
 
-[ -z "$USERNAME" ] && USERNAME=train
+[ -z "$USERNAME" ] && USERNAME=user
 [ -x $NEWROOT/bin/bash -a -z "$USERSHELL" ] && USERSHELL=/bin/bash
 [ -z "$USERSHELL" ] && USERSHELL=/bin/sh
 
@@ -34,18 +34,18 @@ chroot ${NEWROOT} passwd -d $USERNAME >/dev/null 2>&1
 chroot ${NEWROOT} cp -a /etc/skel/. /home/$USERNAME/
 chroot ${NEWROOT} chown -R $USERNAME:$USERNAME /home/$USERNAME
 
-# Setup default root/user password (noidlinux).
-chroot ${NEWROOT} sh -c 'echo "root:noidlinux" | chpasswd -c SHA512'
-chroot ${NEWROOT} sh -c "echo "$USERNAME:noidlinux" | chpasswd -c SHA512"
+# Setup default root/user password (voidlinux).
+chroot ${NEWROOT} sh -c 'echo "root:voidlinux" | chpasswd -c SHA512'
+chroot ${NEWROOT} sh -c "echo "$USERNAME:voidlinux" | chpasswd -c SHA512"
 
 # Enable sudo permission by default.
 if [ -f ${NEWROOT}/etc/sudoers ]; then
-    echo "${USERNAME} ALL=(ALL:ALL) NOPASSWD: ALL" > "${NEWROOT}/etc/sudoers.d/99-noid-live"
+    echo "${USERNAME} ALL=(ALL:ALL) NOPASSWD: ALL" > "${NEWROOT}/etc/sudoers.d/99-void-live"
 fi
 
 if [ -d ${NEWROOT}/etc/polkit-1 ]; then
     # If polkit is installed allow users in the wheel group to run anything.
-    cat > ${NEWROOT}/etc/polkit-1/rules.d/noid-live.rules <<_EOF
+    cat > ${NEWROOT}/etc/polkit-1/rules.d/void-live.rules <<_EOF
 polkit.addAdminRule(function(action, subject) {
     return ["unix-group:wheel"];
 });
@@ -56,7 +56,7 @@ polkit.addRule(function(action, subject) {
     }
 });
 _EOF
-    chroot ${NEWROOT} chown polkitd:polkitd /etc/polkit-1/rules.d/noid-live.rules
+    chroot ${NEWROOT} chown polkitd:polkitd /etc/polkit-1/rules.d/void-live.rules
 fi
 
 if getargbool 0 live.autologin; then
