@@ -27,6 +27,13 @@ fi
 chroot ${NEWROOT} useradd -m -c $USERNAME -G audio,video,wheel -s $USERSHELL $USERNAME
 chroot ${NEWROOT} passwd -d $USERNAME >/dev/null 2>&1
 
+# Belt-and-suspenders: force-apply /etc/skel (theme, panel layout, etc.)
+# on top of whatever useradd -m already copied, so the live desktop
+# always matches the installed one instead of depending on useradd's
+# skel-copy timing.
+chroot ${NEWROOT} cp -a /etc/skel/. /home/$USERNAME/
+chroot ${NEWROOT} chown -R $USERNAME:$USERNAME /home/$USERNAME
+
 # Setup default root/user password (noidlinux).
 chroot ${NEWROOT} sh -c 'echo "root:noidlinux" | chpasswd -c SHA512'
 chroot ${NEWROOT} sh -c "echo "$USERNAME:noidlinux" | chpasswd -c SHA512"
